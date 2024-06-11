@@ -24,7 +24,7 @@ jobs:
     name: Run Pull on Remote Server
     needs: setup_ssh  # This job requires successful completion of setup_ssh
     runs-on: ubuntu-latest
-    environment:
+    env:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       WORK_DIR: ${{ secrets.WORK_DIR }}
