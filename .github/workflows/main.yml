@@ -3,32 +3,21 @@ on:
     branches:
       - main
   workflow_dispatch:
-
+  
 jobs:
-  setup_ssh:  # Separate job for SSH key setup
-    name: Setup SSH Keys
+  run_pull:
+    name: run pull
     runs-on: ubuntu-latest
+    
     steps:
-    - name: Checkout Code (Optional, for using secrets in the same workflow)
-      uses: actions/checkout@v4
-    - name: Add SSH Key  # Uses secret directly
+    - name: install ssh keys
+      # check this thread to understand why its needed:
+      # https://stackoverflow.com/a/70447517
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts  # Append to existing entries
-
-  run_pull:  # Job to pull from remote server
-    name: Run Pull on Remote Server
-    needs: setup_ssh  # Requires successful completion of setup_ssh
-    runs-on: ubuntu-latest
-    env:  # Define environment variables for job
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      SSH_USER: ${{ secrets.SSH_USER }}
-      WORK_DIR: ${{ secrets.WORK_DIR }}
-      MAIN_BRANCH: ${{ secrets.MAIN_BRANCH }}
-    steps:
-    - name: Connect and Pull
-      run: ssh $SSH_HOST "$SSH_USER@${{ env.SSH_HOST }} cd ${{ env.WORK_DIR }} && git checkout ${{ env.MAIN_BRANCH }} && git pull && exit"
-    - name: Cleanup (Optional)
+        install -m 600 -D /dev/null ~/.ssh/id_rsa
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+    - name: connect and pull
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && exit"
+    - name: cleanup
       run: rm -rf ~/.ssh
