@@ -17,7 +17,7 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa  # Remove potential carriage returns
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts  # Append to existing entries
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: ssh-keys
 
@@ -32,7 +32,7 @@ jobs:
       MAIN_BRANCH: ${{ secrets.MAIN_BRANCH }}  # Optional, if not used in setup_ssh
     steps:
     - name: Download SSH Keys (Optional, if not checked out in setup_ssh job)
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ssh-keys
     - name: Connect and Pull
