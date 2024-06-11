@@ -2,7 +2,7 @@ const http = require('http');
 
 http
 	.createServer(function (req, res) {
-		res.write('Hey Richard, What is up?');
+		res.write('Pushing code with github action');
 		res.end();
 	})
 	.listen(3000);
