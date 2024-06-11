@@ -5,37 +5,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup_ssh:
+  setup_ssh:  # Separate job for SSH key setup
     name: Setup SSH Keys
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code (Optional, for using secrets in the same workflow)
       uses: actions/checkout@v4
-    - name: Add SSH Key
+    - name: Add SSH Key  # Uses secret directly
       run: |
-        mkdir -p ~/.ssh # Create the directory if it doesn't exist
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa  # Remove potential carriage returns
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts  # Append to existing entries
-    - uses: actions/upload-artifact@v4
-      with:
-        name: ssh-keys
 
-  run_pull:
+  run_pull:  # Job to pull from remote server
     name: Run Pull on Remote Server
-    needs: setup_ssh  # This job requires successful completion of setup_ssh
+    needs: setup_ssh  # Requires successful completion of setup_ssh
     runs-on: ubuntu-latest
-    env:
+    env:  # Define environment variables for job
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       WORK_DIR: ${{ secrets.WORK_DIR }}
-      MAIN_BRANCH: ${{ secrets.MAIN_BRANCH }}  # Optional, if not used in setup_ssh
+      MAIN_BRANCH: ${{ secrets.MAIN_BRANCH }}
     steps:
-    - name: Download SSH Keys (Optional, if not checked out in setup_ssh job)
-      uses: actions/download-artifact@v4
-      with:
-        name: ssh-keys
     - name: Connect and Pull
       run: ssh $SSH_HOST "$SSH_USER@${{ env.SSH_HOST }} cd ${{ env.WORK_DIR }} && git checkout ${{ env.MAIN_BRANCH }} && git pull && exit"
-    - name: Cleanup (Optional, if keys not downloaded)
+    - name: Cleanup (Optional)
       run: rm -rf ~/.ssh
