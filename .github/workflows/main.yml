@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code (Optional, for using secrets in the same workflow)
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Add SSH Key
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa  # Remove potential carriage returns
