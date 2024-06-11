@@ -2,7 +2,7 @@ const http = require('http');
 
 http
 	.createServer(function (req, res) {
-		res.write('Pushing code with github action');
+		res.write('Pushing code with github action. update branch.');
 		res.end();
 	})
 	.listen(3000);
